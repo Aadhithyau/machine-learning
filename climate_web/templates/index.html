@@ -1,0 +1,1900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E-Commerce ML Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-primary: #080c14;
+  --bg-secondary: #0f1520;
+  --bg-card: #111827;
+  --bg-card-hover: #151f2e;
+  --bg-sidebar: #0c1220;
+  --border: #1e2d45;
+  --border-active: #2d4a6e;
+  --text-primary: #e8edf5;
+  --text-secondary: #7b93b4;
+  --text-muted: #4a6080;
+  --accent-blue: #3b82f6;
+  --accent-blue-light: #60a5fa;
+  --accent-purple: #8b5cf6;
+  --accent-cyan: #06b6d4;
+  --accent-green: #10b981;
+  --accent-amber: #f59e0b;
+  --accent-red: #ef4444;
+  --accent-indigo: #6366f1;
+  --gradient-1: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  --gradient-2: linear-gradient(135deg, #06b6d4, #3b82f6);
+  --gradient-3: linear-gradient(135deg, #10b981, #06b6d4);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.5);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.6);
+  --radius: 10px;
+  --radius-sm: 6px;
+  --radius-lg: 16px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Space Grotesk', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* TOP NAV */
+.top-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(8,12,20,0.95);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  height: 56px;
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-right: 2rem;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.nav-brand-icon {
+  width: 28px;
+  height: 28px;
+  background: var(--gradient-1);
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.nav-brand-text {
+  font-size: 14px;
+  font-weight: 700;
+  background: var(--gradient-1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.nav-tabs {
+  display: flex;
+  gap: 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.nav-tabs::-webkit-scrollbar { display: none; }
+
+.nav-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border: none;
+  background: none;
+  color: var(--text-secondary);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.nav-tab:hover { color: var(--text-primary); background: rgba(59,130,246,0.08); }
+.nav-tab.active {
+  color: var(--accent-blue-light);
+  background: rgba(59,130,246,0.12);
+  border-bottom: 2px solid var(--accent-blue);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+
+.nav-tab .tab-icon { font-size: 14px; }
+
+/* LAYOUT */
+.layout {
+  display: flex;
+  min-height: calc(100vh - 56px);
+}
+
+.sidebar {
+  width: 280px;
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border);
+  padding: 1.5rem;
+  flex-shrink: 0;
+  overflow-y: auto;
+  transition: all 0.3s;
+}
+.sidebar.hidden { display: none; }
+
+.main-content {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+/* CARDS */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  transition: border-color 0.2s;
+}
+.card:hover { border-color: var(--border-active); }
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 1.25rem;
+}
+
+.card-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.card-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.card-subtitle {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* METRICS ROW */
+.metrics-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.metric-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.metric-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--gradient-1);
+}
+
+.metric-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.metric-value {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-family: 'JetBrains Mono', monospace;
+  line-height: 1;
+}
+
+.metric-value.small { font-size: 18px; }
+
+/* SECTION TITLE */
+.section-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.subsection-title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent-blue);
+  margin-bottom: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+/* TABLE */
+.table-wrapper {
+  overflow-x: auto;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+thead tr { background: rgba(59,130,246,0.06); }
+
+th {
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+td {
+  padding: 9px 12px;
+  border-bottom: 1px solid rgba(30,45,69,0.5);
+  color: var(--text-primary);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+}
+
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(59,130,246,0.03); }
+
+/* BUTTONS */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 18px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background: var(--gradient-1);
+  color: white;
+  box-shadow: 0 4px 12px rgba(59,130,246,0.3);
+}
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(59,130,246,0.4); }
+.btn-primary:active { transform: translateY(0); }
+
+.btn-secondary {
+  background: rgba(59,130,246,0.1);
+  color: var(--accent-blue-light);
+  border: 1px solid rgba(59,130,246,0.2);
+}
+.btn-secondary:hover { background: rgba(59,130,246,0.15); }
+
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+.btn-full { width: 100%; justify-content: center; }
+
+/* FORM ELEMENTS */
+.form-group { margin-bottom: 1rem; }
+
+.form-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.form-control {
+  width: 100%;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px;
+  padding: 8px 12px;
+  outline: none;
+  transition: border-color 0.2s;
+  appearance: none;
+}
+.form-control:focus { border-color: var(--accent-blue); }
+
+select.form-control {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237b93b4' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+  cursor: pointer;
+}
+
+input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent-blue);
+}
+
+.range-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--accent-blue-light);
+  font-weight: 600;
+}
+
+/* MULTISELECT */
+.multi-select-wrapper {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-primary);
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.multi-select-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.multi-select-item:hover { background: rgba(59,130,246,0.06); color: var(--text-primary); }
+.multi-select-item input[type="checkbox"] { accent-color: var(--accent-blue); }
+.multi-select-item.checked { color: var(--text-primary); }
+
+/* RADIO GROUP */
+.radio-group { display: flex; flex-direction: column; gap: 6px; }
+.radio-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 13px;
+}
+.radio-item:hover { border-color: var(--border-active); }
+.radio-item.selected { border-color: var(--accent-blue); background: rgba(59,130,246,0.08); color: var(--accent-blue-light); }
+.radio-item input { accent-color: var(--accent-blue); }
+
+/* ALERTS */
+.alert {
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 1rem;
+}
+
+.alert-success { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2); color: #34d399; }
+.alert-warning { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2); color: #fbbf24; }
+.alert-error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); color: #f87171; }
+.alert-info { background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); color: #93c5fd; }
+
+/* TAGS */
+.tag-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+}
+.tag-blue { background: rgba(59,130,246,0.12); color: var(--accent-blue-light); border: 1px solid rgba(59,130,246,0.2); }
+.tag-purple { background: rgba(139,92,246,0.12); color: #c4b5fd; border: 1px solid rgba(139,92,246,0.2); }
+.tag-cyan { background: rgba(6,182,212,0.12); color: #67e8f9; border: 1px solid rgba(6,182,212,0.2); }
+.tag-green { background: rgba(16,185,129,0.12); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.2); }
+
+/* CODE BLOCK */
+.code-block {
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--accent-cyan);
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* SIDEBAR ELEMENTS */
+.sidebar-section {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar-section:last-child { border-bottom: none; }
+
+.sidebar-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+}
+
+/* LOADING */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 3rem;
+  color: var(--text-secondary);
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent-blue);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* PAGE SPECIFIC */
+.page { display: none; }
+.page.active { display: block; }
+
+/* HOME PAGE */
+.home-hero {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.home-hero h1 {
+  font-size: 42px;
+  font-weight: 800;
+  background: var(--gradient-1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 1rem;
+  line-height: 1.2;
+}
+
+.home-hero p {
+  font-size: 16px;
+  color: var(--text-secondary);
+  max-width: 560px;
+  margin: 0 auto 2.5rem;
+  line-height: 1.6;
+}
+
+.workflow-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.workflow-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.workflow-card:hover { border-color: var(--accent-blue); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(59,130,246,0.15); }
+
+.workflow-card .step-num {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.workflow-card .step-icon { font-size: 24px; margin-bottom: 8px; display: block; }
+.workflow-card .step-title { font-size: 14px; font-weight: 700; color: var(--text-primary); }
+.workflow-card .step-desc { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+
+/* DROPZONE */
+.dropzone {
+  border: 2px dashed var(--border-active);
+  border-radius: var(--radius-lg);
+  padding: 3rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: rgba(59,130,246,0.02);
+}
+.dropzone:hover, .dropzone.drag-over {
+  border-color: var(--accent-blue);
+  background: rgba(59,130,246,0.06);
+}
+.dropzone .dz-icon { font-size: 48px; margin-bottom: 1rem; }
+.dropzone .dz-text { font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; }
+.dropzone .dz-sub { font-size: 13px; color: var(--text-secondary); }
+
+/* IMAGE CHART */
+.chart-img {
+  width: 100%;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  margin-bottom: 1rem;
+}
+
+/* EXPANDER */
+.expander {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 0.75rem;
+  overflow: hidden;
+}
+.expander-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  cursor: pointer;
+  background: rgba(30,45,69,0.2);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: all 0.2s;
+}
+.expander-header:hover { color: var(--text-primary); background: rgba(30,45,69,0.4); }
+.expander-body { padding: 14px; display: none; }
+.expander.open .expander-body { display: block; }
+.expander.open .expander-header { color: var(--text-primary); }
+.expander-chevron { transition: transform 0.2s; }
+.expander.open .expander-chevron { transform: rotate(180deg); }
+
+/* SLIDER */
+.slider-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.slider-row input[type=range] { flex: 1; }
+
+/* TEXTAREA */
+textarea.form-control {
+  resize: vertical;
+  min-height: 120px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+}
+
+/* STATUS BADGE */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.badge-excellent { background: rgba(16,185,129,0.15); color: #34d399; }
+.badge-good { background: rgba(59,130,246,0.15); color: var(--accent-blue-light); }
+.badge-moderate { background: rgba(245,158,11,0.15); color: #fbbf24; }
+.badge-weak { background: rgba(239,68,68,0.15); color: #f87171; }
+
+/* Divider */
+.divider { height: 1px; background: var(--border); margin: 1.5rem 0; }
+
+/* Col layout */
+.cols-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+.cols-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+.cols-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+@media (max-width: 768px) {
+  .cols-2, .cols-3, .cols-4 { grid-template-columns: 1fr; }
+  .layout { flex-direction: column; }
+  .sidebar { width: 100%; }
+}
+
+/* page title */
+.page-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+.page-subtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 2rem;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-active); }
+
+/* Toast */
+#toast {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.toast-msg {
+  padding: 12px 18px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: var(--shadow-lg);
+  animation: slideUp 0.3s ease;
+  max-width: 320px;
+}
+.toast-success { background: #064e3b; border: 1px solid #065f46; color: #6ee7b7; }
+.toast-error { background: #450a0a; border: 1px solid #7f1d1d; color: #fca5a5; }
+.toast-info { background: #0c1a3a; border: 1px solid #1e3a6e; color: #93c5fd; }
+@keyframes slideUp { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+/* Charts grid */
+.chart-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
+</style>
+</head>
+<body>
+
+<!-- TOP NAVIGATION -->
+<nav class="top-nav">
+  <a class="nav-brand" onclick="showPage('home')" style="cursor:pointer">
+    <div class="nav-brand-icon">🤖</div>
+    <span class="nav-brand-text">ML Dashboard</span>
+  </a>
+  <div class="nav-tabs">
+    <button class="nav-tab active" data-page="home" onclick="showPage('home')"><span class="tab-icon">🏠</span>APP</button>
+    <button class="nav-tab" data-page="upload" onclick="showPage('upload')"><span class="tab-icon">📤</span>Upload</button>
+    <button class="nav-tab" data-page="profiling" onclick="showPage('profiling')"><span class="tab-icon">📊</span>Data Profiling</button>
+    <button class="nav-tab" data-page="preprocessing" onclick="showPage('preprocessing')"><span class="tab-icon">🛠️</span>Preprocessing</button>
+    <button class="nav-tab" data-page="target" onclick="showPage('target')"><span class="tab-icon">🎯</span>Target Config</button>
+    <button class="nav-tab" data-page="visualization" onclick="showPage('visualization')"><span class="tab-icon">📈</span>Visualization</button>
+    <button class="nav-tab" data-page="modeling" onclick="showPage('modeling')"><span class="tab-icon">🤖</span>Modeling</button>
+    <button class="nav-tab" data-page="metrics" onclick="showPage('metrics')"><span class="tab-icon">📏</span>Metrics</button>
+    <button class="nav-tab" data-page="summary" onclick="showPage('summary')"><span class="tab-icon">✅</span>Final Summary</button>
+  </div>
+</nav>
+
+<div class="layout" id="main-layout">
+  <!-- SIDEBAR (hidden by default, shown for preprocessing/target) -->
+  <aside class="sidebar hidden" id="main-sidebar">
+    <div id="sidebar-content"></div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+
+    <!-- HOME PAGE -->
+    <div class="page active" id="page-home">
+      <div class="home-hero">
+        <h1>Climate change analysis</h1>
+        <p>A complete end-to-end ML workflow — from raw data upload to model evaluation, designed for climate change dataset.</p>
+        <div class="alert alert-info" style="max-width:480px;margin:0 auto 2rem;text-align:left">
+          <span>ℹ️</span>
+          <span>Start from the <strong>Upload</strong> page in the top navigation bar.</span>
+        </div>
+      </div>
+      <div class="workflow-grid">
+        <div class="workflow-card" onclick="showPage('upload')">
+          <div class="step-num">Step 01</div>
+          <span class="step-icon">📤</span>
+          <div class="step-title">Upload Dataset</div>
+          <div class="step-desc">Load CSV or Excel files to begin</div>
+        </div>
+        <div class="workflow-card" onclick="showPage('profiling')">
+          <div class="step-num">Step 02</div>
+          <span class="step-icon">📊</span>
+          <div class="step-title">Data Profiling</div>
+          <div class="step-desc">Classify columns and explore statistics</div>
+        </div>
+        <div class="workflow-card" onclick="showPage('preprocessing')">
+          <div class="step-num">Step 03</div>
+          <span class="step-icon">🛠️</span>
+          <div class="step-title">Preprocessing</div>
+          <div class="step-desc">Impute, scale, and transform features</div>
+        </div>
+        <div class="workflow-card" onclick="showPage('target')">
+          <div class="step-num">Step 04</div>
+          <span class="step-icon">🎯</span>
+          <div class="step-title">Target Config</div>
+          <div class="step-desc">Choose problem type and target column</div>
+        </div>
+        <div class="workflow-card" onclick="showPage('visualization')">
+          <div class="step-num">Step 05</div>
+          <span class="step-icon">📈</span>
+          <div class="step-title">Visualization</div>
+          <div class="step-desc">Bar plots, histograms, and box plots</div>
+        </div>
+        <div class="workflow-card" onclick="showPage('modeling')">
+          <div class="step-num">Step 06</div>
+          <span class="step-icon">🤖</span>
+          <div class="step-title">Modeling</div>
+          <div class="step-desc">Train ML models on your data</div>
+        </div>
+        <div class="workflow-card" onclick="showPage('metrics')">
+          <div class="step-num">Step 07</div>
+          <span class="step-icon">📏</span>
+          <div class="step-title">Metrics</div>
+          <div class="step-desc">Evaluate model performance</div>
+        </div>
+        <div class="workflow-card" onclick="showPage('summary')">
+          <div class="step-num">Step 08</div>
+          <span class="step-icon">✅</span>
+          <div class="step-title">Final Summary</div>
+          <div class="step-desc">Complete project overview & report</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- UPLOAD PAGE -->
+    <div class="page" id="page-upload">
+      <div class="page-title">1. Upload Dataset</div>
+      <div class="page-subtitle">Upload a CSV or Excel file to begin the ML workflow</div>
+
+      <div class="card">
+        <div class="dropzone" id="dropzone" onclick="document.getElementById('file-input').click()">
+          <div class="dz-icon">📂</div>
+          <div class="dz-text">Click to upload or drag & drop</div>
+          <div class="dz-sub">Supports CSV, XLSX, XLS files</div>
+        </div>
+        <input type="file" id="file-input" accept=".csv,.xlsx,.xls" style="display:none" onchange="handleFileUpload(this.files[0])">
+      </div>
+
+      <div id="upload-results" style="display:none">
+        <div id="upload-alert"></div>
+        <div class="metrics-row" id="upload-metrics"></div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon" style="background:rgba(59,130,246,0.1)">📋</div>
+            <div><div class="card-title">Column Names</div></div>
+          </div>
+          <div class="tag-list" id="column-tags"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon" style="background:rgba(139,92,246,0.1)">👁️</div>
+            <div><div class="card-title">Dataset Preview</div><div class="card-subtitle">First 10 rows</div></div>
+          </div>
+          <div class="table-wrapper" id="upload-preview"></div>
+        </div>
+
+        <div class="cols-2">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-icon" style="background:rgba(6,182,212,0.1)">🔤</div>
+              <div><div class="card-title">Data Types</div></div>
+            </div>
+            <div class="table-wrapper" id="dtype-table"></div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-icon" style="background:rgba(245,158,11,0.1)">⚠️</div>
+              <div><div class="card-title">Missing Value Summary</div></div>
+            </div>
+            <div class="table-wrapper" id="missing-table"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROFILING PAGE -->
+    <div class="page" id="page-profiling">
+      <div class="page-title">2. Data Profiling</div>
+      <div class="page-subtitle">Column classification, statistics, and recommendations</div>
+      <div id="profiling-content"><div class="loading"><div class="spinner"></div>Loading profiling data...</div></div>
+    </div>
+
+    <!-- PREPROCESSING PAGE -->
+    <div class="page" id="page-preprocessing">
+      <div class="page-title">3. Preprocessing</div>
+      <div class="page-subtitle">Configure imputation, scaling, and transformations in the sidebar</div>
+      <div id="preprocessing-content"><div class="loading"><div class="spinner"></div>Loading...</div></div>
+    </div>
+
+    <!-- TARGET CONFIGURATION PAGE -->
+    <div class="page" id="page-target">
+      <div class="page-title">4. Target Configuration</div>
+      <div class="page-subtitle">Select problem type and target column in the sidebar</div>
+      <div id="target-content"><div class="loading"><div class="spinner"></div>Loading...</div></div>
+    </div>
+
+    <!-- VISUALIZATION PAGE -->
+    <div class="page" id="page-visualization">
+      <div class="page-title">5. Visualization</div>
+      <div class="page-subtitle">Module 4: Univariate Data Visualization</div>
+      <div id="visualization-content"><div class="loading"><div class="spinner"></div>Generating charts... this may take a moment</div></div>
+    </div>
+
+    <!-- MODELING PAGE -->
+    <div class="page" id="page-modeling">
+      <div class="page-title">6. Modeling</div>
+      <div class="page-subtitle">Train machine learning models on your preprocessed data</div>
+      <div id="modeling-content"><div class="loading"><div class="spinner"></div>Loading...</div></div>
+    </div>
+
+    <!-- METRICS PAGE -->
+    <div class="page" id="page-metrics">
+      <div class="page-title">7. Metrics</div>
+      <div class="page-subtitle">Model evaluation and performance analysis</div>
+      <div id="metrics-content"><div class="loading"><div class="spinner"></div>Loading metrics...</div></div>
+    </div>
+
+    <!-- FINAL SUMMARY PAGE -->
+    <div class="page" id="page-summary">
+      <div class="page-title">8. Final Summary</div>
+      <div class="page-subtitle">Complete project overview and downloadable report</div>
+      <div id="summary-content"><div class="loading"><div class="spinner"></div>Loading summary...</div></div>
+    </div>
+
+  </main>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div id="toast"></div>
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+let currentPage = 'home';
+let uploadedData = null;
+
+// ============================================================
+// UTILITIES
+// ============================================================
+function showToast(msg, type='info') {
+  const toast = document.getElementById('toast');
+  const el = document.createElement('div');
+  el.className = `toast-msg toast-${type}`;
+  el.textContent = msg;
+  toast.appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+function buildTable(headers, rows) {
+  if (!rows || rows.length === 0) return '<div class="alert alert-info"><span>ℹ️</span><span>No data available</span></div>';
+  let html = '<table><thead><tr>';
+  headers.forEach(h => { html += `<th>${h}</th>`; });
+  html += '</tr></thead><tbody>';
+  rows.forEach(row => {
+    html += '<tr>';
+    row.forEach(cell => { html += `<td>${cell}</td>`; });
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  return html;
+}
+
+function metricCard(label, value, color='blue') {
+  const gradients = {
+    blue: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+    green: 'linear-gradient(135deg, #10b981, #06b6d4)',
+    amber: 'linear-gradient(135deg, #f59e0b, #ef4444)',
+    purple: 'linear-gradient(135deg, #8b5cf6, #6366f1)',
+  };
+  return `<div class="metric-card">
+    <div style="position:absolute;top:0;left:0;right:0;height:2px;background:${gradients[color] || gradients.blue}"></div>
+    <div class="metric-label">${label}</div>
+    <div class="metric-value ${String(value).length > 8 ? 'small' : ''}">${value}</div>
+  </div>`;
+}
+
+function alertHtml(type, msg) {
+  const icons = {success:'✅', warning:'⚠️', error:'❌', info:'ℹ️'};
+  return `<div class="alert alert-${type}"><span>${icons[type]||'ℹ️'}</span><span>${msg}</span></div>`;
+}
+
+async function api(endpoint, method='GET', body=null) {
+  const opts = { method, headers: {'Content-Type': 'application/json'} };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(endpoint, opts);
+  return res.json();
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.page === name);
+  });
+  document.getElementById(`page-${name}`).classList.add('active');
+
+  const sidebar = document.getElementById('main-sidebar');
+  const pagesWithSidebar = ['preprocessing', 'target'];
+
+  if (pagesWithSidebar.includes(name)) {
+    sidebar.classList.remove('hidden');
+  } else {
+    sidebar.classList.add('hidden');
+  }
+
+  currentPage = name;
+
+  if (name === 'profiling') loadProfiling();
+  if (name === 'preprocessing') loadPreprocessing();
+  if (name === 'target') loadTarget();
+  if (name === 'visualization') loadVisualization();
+  if (name === 'modeling') loadModeling();
+  if (name === 'metrics') loadMetrics();
+  if (name === 'summary') loadSummary();
+}
+
+// ============================================================
+// UPLOAD
+// ============================================================
+const dropzone = document.getElementById('dropzone');
+
+dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag-over'); });
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
+dropzone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropzone.classList.remove('drag-over');
+  if (e.dataTransfer.files[0]) handleFileUpload(e.dataTransfer.files[0]);
+});
+
+async function handleFileUpload(file) {
+  if (!file) return;
+  dropzone.innerHTML = `<div class="loading"><div class="spinner"></div>Uploading ${file.name}...</div>`;
+
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const res = await fetch('/api/upload', { method: 'POST', body: formData });
+  const data = await res.json();
+
+  dropzone.innerHTML = `<div class="dz-icon">📂</div><div class="dz-text">Click to upload or drag & drop</div><div class="dz-sub">Supports CSV, XLSX, XLS files</div>`;
+
+  if (data.error) {
+    document.getElementById('upload-alert').innerHTML = alertHtml('error', data.error);
+    document.getElementById('upload-results').style.display = 'block';
+    return;
+  }
+
+  uploadedData = data;
+  document.getElementById('upload-alert').innerHTML = alertHtml('success', `Dataset "${data.filename}" uploaded successfully!`);
+  document.getElementById('upload-results').style.display = 'block';
+
+  // Metrics
+  document.getElementById('upload-metrics').innerHTML =
+    metricCard('Rows', data.rows.toLocaleString(), 'blue') +
+    metricCard('Columns', data.cols, 'purple') +
+    metricCard('Missing Values', data.missing_total.toLocaleString(), 'amber');
+
+  // Column tags
+  const tagColors = ['tag-blue', 'tag-purple', 'tag-cyan', 'tag-green'];
+  document.getElementById('column-tags').innerHTML =
+    data.columns.map((c, i) => `<span class="tag ${tagColors[i % 4]}">${c}</span>`).join('');
+
+  // Preview table
+  document.getElementById('upload-preview').innerHTML = buildTable(data.preview_cols, data.preview);
+
+  // Dtypes
+  document.getElementById('dtype-table').innerHTML = buildTable(['Column', 'Data Type'], data.dtypes);
+
+  // Missing
+  document.getElementById('missing-table').innerHTML = buildTable(data.missing_cols, data.missing_summary.map(r => [r[0], r[1], r[2].toFixed(2) + '%']));
+
+  showToast('Dataset uploaded successfully!', 'success');
+}
+
+// ============================================================
+// PROFILING
+// ============================================================
+async function loadProfiling() {
+  document.getElementById('profiling-content').innerHTML = '<div class="loading"><div class="spinner"></div>Profiling dataset...</div>';
+  const data = await api('/api/profiling');
+
+  if (data.error) {
+    document.getElementById('profiling-content').innerHTML = alertHtml('warning', data.error);
+    return;
+  }
+
+  const tagColors = ['tag-blue', 'tag-purple', 'tag-cyan', 'tag-green'];
+
+  let html = `
+    <div class="metrics-row">
+      ${metricCard('Numeric Columns', data.numeric.length, 'blue')}
+      ${metricCard('Categorical Columns', data.categorical.length, 'purple')}
+      ${metricCard('Text-like Columns', data.text_like.length, 'amber')}
+      ${metricCard('Datetime Columns', data.datetime.length, 'green')}
+    </div>
+
+    <div class="cols-2">
+      <div class="card">
+        <div class="card-header"><div class="card-icon" style="background:rgba(59,130,246,0.1)">🔢</div>
+          <div><div class="card-title">Numeric Columns</div></div></div>
+        <div class="tag-list">${data.numeric.length ? data.numeric.map(c => `<span class="tag tag-blue">${c}</span>`).join('') : '<span style="color:var(--text-muted)">No numeric columns found.</span>'}</div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon" style="background:rgba(139,92,246,0.1)">🏷️</div>
+          <div><div class="card-title">Categorical Columns</div></div></div>
+        <div class="tag-list">${data.categorical.length ? data.categorical.map(c => `<span class="tag tag-purple">${c}</span>`).join('') : '<span style="color:var(--text-muted)">No categorical columns found.</span>'}</div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon" style="background:rgba(6,182,212,0.1)">📝</div>
+          <div><div class="card-title">Text-like Columns</div></div></div>
+        <div class="tag-list">${data.text_like.length ? data.text_like.map(c => `<span class="tag tag-cyan">${c}</span>`).join('') : '<span style="color:var(--text-muted)">No text-like columns found.</span>'}</div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon" style="background:rgba(16,185,129,0.1)">📅</div>
+          <div><div class="card-title">Datetime Columns</div></div></div>
+        <div class="tag-list">${data.datetime.length ? data.datetime.map(c => `<span class="tag tag-green">${c}</span>`).join('') : '<span style="color:var(--text-muted)">No datetime columns found.</span>'}</div>
+      </div>
+    </div>`;
+
+  if (data.stats) {
+    html += `<div class="card">
+      <div class="card-header"><div class="card-icon" style="background:rgba(59,130,246,0.1)">📈</div>
+        <div><div class="card-title">Basic Statistical Summary</div><div class="card-subtitle">Numeric features</div></div></div>
+      <div class="table-wrapper">${buildTable(data.stats.cols, data.stats.data)}</div>
+    </div>`;
+  }
+
+  html += `<div class="section-title">Target Suitability Suggestions</div>
+    <div class="cols-2">
+      <div class="card">
+        <div class="card-header"><div class="card-icon" style="background:rgba(59,130,246,0.1)">📉</div>
+          <div><div class="card-title">Regression Target Candidates</div></div></div>
+        <div class="tag-list">${data.regression_candidates.length ? data.regression_candidates.map(c => `<span class="tag tag-blue">${c}</span>`).join('') : '<span style="color:var(--text-muted)">None found.</span>'}</div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon" style="background:rgba(139,92,246,0.1)">🎯</div>
+          <div><div class="card-title">Classification Target Candidates</div></div></div>
+        <div class="tag-list">${data.classification_candidates.length ? data.classification_candidates.map(c => `<span class="tag tag-purple">${c}</span>`).join('') : '<span style="color:var(--text-muted)">None found.</span>'}</div>
+      </div>
+    </div>
+
+    <div class="section-title">Recommendations</div>
+    <div class="cols-2">
+      <div class="card">
+        <div class="card-header"><div class="card-icon" style="background:rgba(16,185,129,0.1)">💡</div>
+          <div><div class="card-title">Imputation Recommendation</div></div></div>
+        ${alertHtml('success', `Recommended: ${data.imputation_rec.recommended}`)}
+        <p style="color:var(--text-secondary);font-size:13px">${data.imputation_rec.reason}</p>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon" style="background:rgba(6,182,212,0.1)">⚖️</div>
+          <div><div class="card-title">Scaling Recommendation</div></div></div>
+        ${alertHtml('success', `Recommended: ${data.scaling_rec.recommended}`)}
+        <p style="color:var(--text-secondary);font-size:13px">${data.scaling_rec.reason}</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-icon" style="background:rgba(245,158,11,0.1)">🧩</div>
+        <div><div class="card-title">Problem Type Suggestions</div></div></div>
+      ${data.problem_recs.map(r => `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:13px;color:var(--text-secondary)"><span>•</span>${r}</div>`).join('')}
+    </div>`;
+
+  document.getElementById('profiling-content').innerHTML = html;
+}
+
+// ============================================================
+// PREPROCESSING
+// ============================================================
+let preprocessingData = null;
+
+async function loadPreprocessing() {
+  const data = await api('/api/preprocessing/status');
+  if (data.error) {
+    document.getElementById('preprocessing-content').innerHTML = alertHtml('warning', data.error);
+    document.getElementById('sidebar-content').innerHTML = '';
+    return;
+  }
+  preprocessingData = data;
+  renderPreprocessingSidebar(data);
+  renderPreprocessingMain(data);
+}
+
+function renderPreprocessingSidebar(data) {
+  const numCols = data.numeric_cols || [];
+  const catCols = data.categorical_cols || [];
+
+  const makeCheckboxes = (cols, prefix, defaults) =>
+    cols.map(c => `<label class="multi-select-item ${defaults.includes(c) ? 'checked' : ''}">
+      <input type="checkbox" name="${prefix}" value="${c}" ${defaults.includes(c) ? 'checked' : ''} onchange="this.closest('.multi-select-item').classList.toggle('checked',this.checked)">
+      ${c}</label>`).join('');
+
+  document.getElementById('sidebar-content').innerHTML = `
+    <div class="sidebar-section">
+      <div class="sidebar-title">Missing Value Handling</div>
+
+      <div class="form-group">
+        <label class="form-label">Numeric Columns</label>
+        <div class="multi-select-wrapper">${makeCheckboxes(numCols, 'num_impute', numCols)}</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Categorical Columns</label>
+        <div class="multi-select-wrapper">${makeCheckboxes(catCols, 'cat_impute', catCols)}</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Imputation Technique</label>
+        <select class="form-control" id="imputer-choice" onchange="updateImputerOptions()">
+          <option>No Imputation</option>
+          <option>Simple Imputer</option>
+          <option>KNN Imputer</option>
+          <option>Iterative Imputer</option>
+        </select>
+      </div>
+      <div id="imputer-options"></div>
+      <button class="btn btn-primary btn-full" onclick="applyImputation()">✔ Apply Imputation</button>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">Scaling</div>
+      <div class="form-group">
+        <label class="form-label">Numeric Columns to Scale</label>
+        <div class="multi-select-wrapper">${makeCheckboxes(numCols, 'scale_cols', numCols)}</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Scaling Technique</label>
+        <select class="form-control" id="scaler-choice">
+          <option>No Scaling</option>
+          <option>StandardScaler</option>
+          <option>MinMaxScaler</option>
+          <option>RobustScaler</option>
+          <option>MaxAbsScaler</option>
+        </select>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="applyScaling()">✔ Apply Scaling</button>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">Transformations</div>
+      <div class="form-group">
+        <label class="form-label">Numeric Columns to Transform</label>
+        <div class="multi-select-wrapper">${makeCheckboxes(numCols, 'transform_cols', [])}</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Transformation</label>
+        <select class="form-control" id="transform-choice">
+          <option>No Transformation</option>
+          <option>Log</option>
+          <option>Sqrt</option>
+          <option>Box-Cox</option>
+          <option>Yeo-Johnson</option>
+        </select>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="applyTransformation()">✔ Apply Transformation</button>
+    </div>`;
+}
+
+function updateImputerOptions() {
+  const choice = document.getElementById('imputer-choice').value;
+  let html = '';
+  if (choice === 'Simple Imputer') {
+    html = `<div class="form-group">
+      <label class="form-label">Numeric Strategy</label>
+      <select class="form-control" id="num-strategy"><option>mean</option><option>median</option><option>most_frequent</option></select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Categorical Strategy</label>
+      <select class="form-control" id="cat-strategy" onchange="toggleFillValue()"><option>most_frequent</option><option>constant</option></select>
+    </div>
+    <div class="form-group" id="fill-value-group" style="display:none">
+      <label class="form-label">Fill Value</label>
+      <input class="form-control" id="fill-value" value="Missing">
+    </div>`;
+  } else if (choice === 'KNN Imputer') {
+    html = `<div class="form-group">
+      <label class="form-label">Neighbors (k): <span class="range-value" id="knn-val">5</span></label>
+      <div class="slider-row"><input type="range" min="1" max="15" value="5" oninput="document.getElementById('knn-val').textContent=this.value"></div>
+    </div>`;
+  } else if (choice === 'Iterative Imputer') {
+    html = `<div class="form-group">
+      <label class="form-label">Max Iterations: <span class="range-value" id="iter-val">10</span></label>
+      <div class="slider-row"><input type="range" min="5" max="50" value="10" oninput="document.getElementById('iter-val').textContent=this.value"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Random State</label>
+      <input class="form-control" id="iter-seed" type="number" value="42" min="0" max="9999">
+    </div>`;
+  }
+  document.getElementById('imputer-options').innerHTML = html;
+}
+
+function toggleFillValue() {
+  const v = document.getElementById('cat-strategy').value;
+  document.getElementById('fill-value-group').style.display = v === 'constant' ? 'block' : 'none';
+}
+
+function getChecked(name) {
+  return [...document.querySelectorAll(`input[name="${name}"]:checked`)].map(e => e.value);
+}
+
+async function applyImputation() {
+  const technique = document.getElementById('imputer-choice').value;
+  const body = {
+    action: 'impute',
+    technique,
+    numeric_cols: getChecked('num_impute'),
+    categorical_cols: getChecked('cat_impute')
+  };
+  if (technique === 'Simple Imputer') {
+    body.numeric_strategy = document.getElementById('num-strategy')?.value || 'mean';
+    body.categorical_strategy = document.getElementById('cat-strategy')?.value || 'most_frequent';
+    body.fill_value = document.getElementById('fill-value')?.value || 'Missing';
+  } else if (technique === 'KNN Imputer') {
+    body.knn_neighbors = parseInt(document.getElementById('knn-val').textContent);
+  } else if (technique === 'Iterative Imputer') {
+    body.max_iter = parseInt(document.getElementById('iter-val').textContent);
+    body.random_state = parseInt(document.getElementById('iter-seed').value);
+  }
+
+  const res = await api('/api/preprocessing/apply', 'POST', body);
+  if (res.error) { showToast(res.error, 'error'); return; }
+  showToast(res.message || 'Applied!', 'success');
+  loadPreprocessing();
+}
+
+async function applyScaling() {
+  const res = await api('/api/preprocessing/apply', 'POST', {
+    action: 'scale',
+    technique: document.getElementById('scaler-choice').value,
+    columns: getChecked('scale_cols')
+  });
+  if (res.error) { showToast(res.error, 'error'); return; }
+  if (res.warning) showToast(res.warning, 'warning');
+  showToast(res.message || 'Applied!', 'success');
+  loadPreprocessing();
+}
+
+async function applyTransformation() {
+  const res = await api('/api/preprocessing/apply', 'POST', {
+    action: 'transform',
+    technique: document.getElementById('transform-choice').value,
+    columns: getChecked('transform_cols')
+  });
+  if (res.error) { showToast(res.error, 'error'); return; }
+  if (res.warning) showToast(res.warning, 'warning');
+  showToast(res.message || 'Applied!', 'success');
+  loadPreprocessing();
+}
+
+function renderPreprocessingMain(data) {
+  const skewTable = buildTable(['Feature','Mean','Median','Skewness','Classification'], data.skewness.map(r => [r.Feature, r.Mean, r.Median, r.Skewness, r.Classification]));
+
+  const symmetric = data.skewness.filter(r => r.Classification === 'Symmetric').length;
+  const rightSkewed = data.skewness.filter(r => r.Classification === 'Right-Skewed').length;
+  const leftSkewed = data.skewness.filter(r => r.Classification === 'Left-Skewed').length;
+
+  let summaryHtml = '';
+  if (data.summary && data.summary.length) {
+    summaryHtml = data.summary.map((s,i) => `<div style="padding:7px 0;border-bottom:1px solid var(--border);font-size:12px;color:var(--text-secondary)"><span style="color:var(--accent-blue);font-weight:700">${i+1}.</span> ${s}</div>`).join('');
+  } else {
+    summaryHtml = '<div class="alert alert-info"><span>ℹ️</span><span>No preprocessing steps applied yet.</span></div>';
+  }
+
+  document.getElementById('preprocessing-content').innerHTML = `
+    <div class="section-title">Current Dataset Snapshot</div>
+    <div class="metrics-row">
+      ${metricCard('Rows', data.rows.toLocaleString(), 'blue')}
+      ${metricCard('Columns', data.cols, 'purple')}
+      ${metricCard('Missing Values', data.missing, data.missing > 0 ? 'amber' : 'green')}
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-icon" style="background:rgba(59,130,246,0.1)">👁️</div>
+        <div><div class="card-title">Dataset Preview</div></div></div>
+      <div class="table-wrapper">${buildTable(data.preview_cols, data.preview)}</div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="section-title">1. Missing Value Handling Summary</div>
+    <div class="card">
+      <div class="card-header"><div class="card-icon" style="background:rgba(245,158,11,0.1)">⚠️</div>
+        <div><div class="card-title">Missing Value Summary</div></div></div>
+      <div class="table-wrapper">${buildTable(data.missing_cols, data.missing_summary.map(r => [r[0], r[1], (+r[2]).toFixed(2)+'%']))}</div>
+    </div>
+    ${alertHtml('success', `Recommended: ${data.imputation_rec.recommended}`)}
+    <p style="color:var(--text-secondary);font-size:13px;margin-bottom:1.5rem">${data.imputation_rec.reason}</p>
+
+    <div class="divider"></div>
+    <div class="section-title">2. Symmetry / Skewness Analysis</div>
+    <div class="metrics-row">
+      ${metricCard('Symmetric', symmetric, 'green')}
+      ${metricCard('Right-Skewed', rightSkewed, 'amber')}
+      ${metricCard('Left-Skewed', leftSkewed, 'purple')}
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-icon" style="background:rgba(6,182,212,0.1)">📊</div>
+        <div><div class="card-title">Skewness Table</div></div></div>
+      <div class="table-wrapper">${skewTable}</div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="section-title">3. Scaling Summary</div>
+    ${alertHtml('success', `Recommended: ${data.scaling_rec.recommended}`)}
+    <p style="color:var(--text-secondary);font-size:13px;margin-bottom:1.5rem">${data.scaling_rec.reason}</p>
+
+    <div class="divider"></div>
+    <div class="section-title">5. Preprocessing Summary</div>
+    <div class="card">${summaryHtml}</div>`;
+}
+
+// ============================================================
+// TARGET CONFIGURATION
+// ============================================================
+let targetData = null;
+
+async function loadTarget() {
+  const data = await api('/api/target/status');
+  if (data.error) {
+    document.getElementById('target-content').innerHTML = alertHtml('warning', data.error);
+    return;
+  }
+  targetData = data;
+  renderTargetSidebar(data);
+  renderTargetMain(data);
+}
+
+function renderTargetSidebar(data) {
+  const problems = ['Regression', 'Classification', 'Clustering'];
+  const saved = data.saved_problem_type || 'Regression';
+
+  const radioItems = problems.map(p => `
+    <label class="radio-item ${saved === p ? 'selected' : ''}" onclick="selectProblemType('${p}')">
+      <input type="radio" name="problem_type" value="${p}" ${saved === p ? 'checked' : ''}> ${p}
+    </label>`).join('');
+
+  document.getElementById('sidebar-content').innerHTML = `
+    <div class="sidebar-section">
+      <div class="sidebar-title">Target Configuration</div>
+      <div class="form-group">
+        <label class="form-label">Problem Type</label>
+        <div class="radio-group">${radioItems}</div>
+      </div>
+      <div id="target-col-section"></div>
+      <button class="btn btn-primary btn-full" onclick="saveTargetConfig()" style="margin-top:1rem">💾 Save Configuration</button>
+    </div>`;
+
+  renderTargetColSelector(data, saved);
+}
+
+function selectProblemType(pt) {
+  document.querySelectorAll('.radio-item').forEach(el => {
+    el.classList.toggle('selected', el.querySelector('input').value === pt);
+  });
+  document.querySelector(`input[name="problem_type"][value="${pt}"]`).checked = true;
+  renderTargetColSelector(targetData, pt);
+}
+
+function renderTargetColSelector(data, pt) {
+  const section = document.getElementById('target-col-section');
+  if (!section) return;
+  const saved = data.saved_target_column;
+
+  if (pt === 'Clustering') {
+    section.innerHTML = '<div class="alert alert-info"><span>ℹ️</span><span>No target column needed for clustering.</span></div>';
+    return;
+  }
+
+  const cols = pt === 'Regression' ? data.numeric_cols : data.classification_candidates;
+  if (!cols || cols.length === 0) {
+    section.innerHTML = `<div class="alert alert-error"><span>❌</span><span>No suitable columns for ${pt}.</span></div>`;
+    return;
+  }
+
+  const defaultVal = cols.includes(saved) ? saved : cols[0];
+  section.innerHTML = `<div class="form-group">
+    <label class="form-label">${pt === 'Regression' ? 'Numeric' : 'Categorical'} Target Column</label>
+    <select class="form-control" id="target-col-select">
+      ${cols.map(c => `<option ${c === defaultVal ? 'selected' : ''}>${c}</option>`).join('')}
+    </select>
+  </div>`;
+}
+
+async function saveTargetConfig() {
+  const pt = document.querySelector('input[name="problem_type"]:checked')?.value || 'Regression';
+  const targetCol = pt === 'Clustering' ? null : document.getElementById('target-col-select')?.value;
+
+  const res = await api('/api/target/save', 'POST', { problem_type: pt, target_col: targetCol });
+  if (res.error) { showToast(res.error, 'error'); return; }
+
+  showToast('Configuration saved!', 'success');
+  const data = await api('/api/target/status');
+  targetData = data;
+  renderTargetMain(data, res.recommendation);
+}
+
+function renderTargetMain(data, rec) {
+  const saved = data.saved_problem_type || 'Regression';
+  const target = data.saved_target_column;
+
+  let recHtml = '';
+  if (rec) {
+    recHtml = `<div class="card">
+      <div class="card-header"><div class="card-icon" style="background:rgba(59,130,246,0.1)">💡</div>
+        <div><div class="card-title">Recommended Model</div></div></div>
+      ${alertHtml('info', `Recommended: ${rec.recommended}`)}
+      <p style="color:var(--text-secondary);font-size:13px">${rec.reason}</p>
+    </div>`;
+  }
+
+  let statusHtml = '';
+  if (saved === 'Clustering') {
+    statusHtml = alertHtml('success', 'No target column is required for clustering.');
+  } else if (target) {
+    statusHtml = alertHtml('success', `Selected target column: ${target}`);
+  }
+
+  document.getElementById('target-content').innerHTML = `
+    <div class="section-title">Current Selection</div>
+    <div class="metrics-row">
+      ${metricCard('Problem Type', saved, 'blue')}
+      ${metricCard('Target Column', target || 'Not Required', 'purple')}
+    </div>
+    ${statusHtml}
+
+    <div class="divider"></div>
+    <div class="section-title">Available Column Summary</div>
+    <div class="metrics-row">
+      ${metricCard('Numeric Columns', data.numeric_cols.length, 'blue')}
+      ${metricCard('Categorical Columns', data.categorical_cols.length, 'purple')}
+    </div>
+
+    <div class="expander">
+      <div class="expander-header" onclick="toggleExpander(this)">
+        View Numeric Columns <span class="expander-chevron">▼</span>
+      </div>
+      <div class="expander-body">
+        <div class="tag-list">${data.numeric_cols.map(c => `<span class="tag tag-blue">${c}</span>`).join('')}</div>
+      </div>
+    </div>
+    <div class="expander">
+      <div class="expander-header" onclick="toggleExpander(this)">
+        View Categorical Columns <span class="expander-chevron">▼</span>
+      </div>
+      <div class="expander-body">
+        <div class="tag-list">${data.categorical_cols.map(c => `<span class="tag tag-purple">${c}</span>`).join('')}</div>
+      </div>
+    </div>
+    ${recHtml}`;
+}
+
+function toggleExpander(header) {
+  header.closest('.expander').classList.toggle('open');
+}
+
+// ============================================================
+// VISUALIZATION
+// ============================================================
+async function loadVisualization() {
+  document.getElementById('visualization-content').innerHTML =
+    '<div class="loading"><div class="spinner"></div>Generating charts... please wait</div>';
+
+  const data = await api('/api/visualization');
+  if (data.error) {
+    document.getElementById('visualization-content').innerHTML = alertHtml('warning', data.error);
+    return;
+  }
+
+  let html = '';
+  if (data.sampled) {
+    html += alertHtml('info', `Dataset is large. Visualizations use a random sample of ${data.sample_size.toLocaleString()} rows.`);
+  }
+
+  // Bar plots
+  html += `<div class="section-title">Bar Plots for Categorical Features</div>`;
+  if (!data.charts.bar.length) {
+    html += alertHtml('info', 'No categorical features available for bar plots.');
+  } else {
+    data.charts.bar.forEach(c => {
+      html += `<div class="card">
+        <div class="card-header"><div class="card-icon" style="background:rgba(59,130,246,0.1)">📊</div>
+          <div><div class="card-title">Bar Plot — ${c.col}</div><div class="card-subtitle">Unique values: ${c.unique}</div></div>
+        </div>
+        <img class="chart-img" src="data:image/png;base64,${c.img}" alt="Bar plot ${c.col}">
+      </div>`;
+    });
+  }
+
+  // Histograms
+  html += `<div class="divider"></div><div class="section-title">Histograms for Numeric Features</div>`;
+  if (!data.charts.histogram.length) {
+    html += alertHtml('info', 'No numeric features available for histograms.');
+  } else {
+    data.charts.histogram.forEach(c => {
+      html += `<div class="card">
+        <div class="card-header"><div class="card-icon" style="background:rgba(139,92,246,0.1)">📈</div>
+          <div><div class="card-title">Histogram — ${c.col}</div></div>
+        </div>
+        <img class="chart-img" src="data:image/png;base64,${c.img}" alt="Histogram ${c.col}">
+      </div>`;
+    });
+  }
+
+  // Box plots
+  html += `<div class="divider"></div><div class="section-title">Box Plots for Numeric Features</div>`;
+  if (!data.charts.boxplot.length) {
+    html += alertHtml('info', 'No numeric features available for box plots.');
+  } else {
+    data.charts.boxplot.forEach(c => {
+      html += `<div class="card">
+        <div class="card-header"><div class="card-icon" style="background:rgba(6,182,212,0.1)">📦</div>
+          <div><div class="card-title">Box Plot — ${c.col}</div></div>
+        </div>
+        <img class="chart-img" src="data:image/png;base64,${c.img}" alt="Box plot ${c.col}">
+        <div class="metrics-row" style="margin-top:0.75rem">
+          ${metricCard('Median', c.median, 'blue')}
+          ${metricCard('IQR', c.iqr, 'purple')}
+          ${metricCard('Outliers', c.outliers, c.outliers > 0 ? 'amber' : 'green')}
+        </div>
+      </div>`;
+    });
+  }
+
+  document.getElementById('visualization-content').innerHTML = html;
+}
+
+// ============================================================
+// MODELING
+// ============================================================
+async function loadModeling() {
+  const data = await api('/api/target/status');
+  const pt = data.saved_problem_type || 'Regression';
+  const target = data.saved_target_column;
+
+  let html = `
+    <div class="metrics-row">
+      ${metricCard('Problem Type', pt, 'blue')}
+      ${metricCard('Target Column', target || 'Not Required', 'purple')}
+    </div>`;
+
+  if (pt === 'Regression') {
+    html += `<div class="card">
+      <div class="card-header"><div class="card-icon" style="background:rgba(59,130,246,0.1)">📉</div>
+        <div><div class="card-title">Regression Configuration</div><div class="card-subtitle">Linear Regression model</div></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Test Size (%): <span class="range-value" id="reg-test-val">20</span></label>
+        <div class="slider-row"><input type="range" id="reg-test-size" min="10" max="40" value="20" step="5" oninput="document.getElementById('reg-test-val').textContent=this.value"></div>
+      </div>
+      <button class="btn btn-primary" onclick="trainModel('Regression')">🚀 Train Regression Model</button>
+      <div id="modeling-status"></div>
+    </div>`;
+  } else if (pt === 'Classification') {
+    html += `<div class="card">
+      <div class="card-header"><div class="card-icon" style="background:rgba(139,92,246,0.1)">🎯</div>
+        <div><div class="card-title">Classification Configuration</div></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Test Size (%): <span class="range-value" id="cls-test-val">20</span></label>
+        <div class="slider-row"><input type="range" id="cls-test-size" min="10" max="40" value="20" step="5" oninput="document.getElementById('cls-test-val').textContent=this.value"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Classification Model</label>
+        <select class="form-control" id="cls-model">
+          <option value="Decision Tree">Decision Tree</option>
+          <option value="Bayes">Bayes</option>
+          <option value="KNN">KNN</option>
+          <option value="SVM">SVM</option>
+          <option value="ANN">ANN</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="trainModel('Classification')">🚀 Train Classification Model</button>
+      <div id="modeling-status"></div>
+    </div>`;
+  } else if (pt === 'Clustering') {
+    html += `<div class="card">
+      <div class="card-header"><div class="card-icon" style="background:rgba(16,185,129,0.1)">🔵</div>
+        <div><div class="card-title">Clustering Configuration</div></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Clustering Model</label>
+        <select class="form-control" id="cluster-model" onchange="updateClusterOptions()">
+          <option value="KMeans">KMeans</option>
+          <option value="DBSCAN">DBSCAN</option>
+          <option value="MeanShift">MeanShift</option>
+        </select>
+      </div>
+      <div id="cluster-options">
+        <div class="form-group">
+          <label class="form-label">Number of Clusters: <span class="range-value" id="n-clusters-val">3</span></label>
+          <div class="slider-row"><input type="range" id="n-clusters" min="2" max="10" value="3" step="1" oninput="document.getElementById('n-clusters-val').textContent=this.value"></div>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="trainModel('Clustering')">🚀 Train Clustering Model</button>
+      <div id="modeling-status"></div>
+    </div>`;
+  }
+
+  document.getElementById('modeling-content').innerHTML = html;
+}
+
+function updateClusterOptions() {
+  const m = document.getElementById('cluster-model').value;
+  let html = '';
+  if (m === 'KMeans') {
+    html = `<div class="form-group">
+      <label class="form-label">Clusters: <span class="range-value" id="n-clusters-val">3</span></label>
+      <div class="slider-row"><input type="range" id="n-clusters" min="2" max="10" value="3" step="1" oninput="document.getElementById('n-clusters-val').textContent=this.value"></div>
+    </div>`;
+  } else if (m === 'DBSCAN') {
+    html = `<div class="form-group">
+      <label class="form-label">Eps: <span class="range-value" id="eps-val">0.5</span></label>
+      <div class="slider-row"><input type="range" id="dbscan-eps" min="1" max="50" value="5" step="1" oninput="document.getElementById('eps-val').textContent=(this.value/10).toFixed(1)"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Min Samples: <span class="range-value" id="min-samples-val">5</span></label>
+      <div class="slider-row"><input type="range" id="dbscan-min" min="2" max="20" value="5" step="1" oninput="document.getElementById('min-samples-val').textContent=this.value"></div>
+    </div>`;
+  }
+  document.getElementById('cluster-options').innerHTML = html;
+}
+
+async function trainModel(pt) {
+  document.getElementById('modeling-status').innerHTML = '<div class="loading"><div class="spinner"></div>Training model...</div>';
+
+  const body = {};
+  if (pt === 'Regression') {
+    body.test_size = parseInt(document.getElementById('reg-test-size').value);
+    body.model = 'Linear Regression';
+  } else if (pt === 'Classification') {
+    body.test_size = parseInt(document.getElementById('cls-test-size').value);
+    body.model = document.getElementById('cls-model').value;
+  } else if (pt === 'Clustering') {
+    body.model = document.getElementById('cluster-model').value;
+    body.n_clusters = parseInt(document.getElementById('n-clusters')?.value || 3);
+    body.eps = parseFloat(document.getElementById('dbscan-eps')?.value || 5) / 10;
+    body.min_samples = parseInt(document.getElementById('dbscan-min')?.value || 5);
+  }
+
+  const res = await api('/api/modeling/train', 'POST', body);
+
+  if (res.error) {
+    document.getElementById('modeling-status').innerHTML = alertHtml('error', res.error);
+    return;
+  }
+
+  let featuresHtml = '';
+  if (res.features) {
+    featuresHtml = `<div class="subsection-title">Feature Columns Used</div>
+      <div class="tag-list">${res.features.map(f => `<span class="tag tag-blue">${f}</span>`).join('')}</div>`;
+    if (res.dropped && res.dropped.length) {
+      featuresHtml += `<div style="margin-top:0.75rem"><span style="color:var(--text-muted);font-size:12px">Dropped: </span>${res.dropped.map(f => `<span class="tag" style="background:rgba(239,68,68,0.08);color:#f87171;border-color:rgba(239,68,68,0.15)">${f}</span>`).join(' ')}</div>`;
+    }
+  }
+
+  document.getElementById('modeling-status').innerHTML =
+    `${alertHtml('success', res.message)}${featuresHtml}`;
+  showToast(res.message, 'success');
+}
+
+// ============================================================
+// METRICS
+// ============================================================
+async function loadMetrics() {
+  document.getElementById('metrics-content').innerHTML = '<div class="loading"><div class="spinner"></div>Computing metrics...</div>';
+  const data = await api('/api/metrics');
+
+  if (data.error) {
+    document.getElementById('metrics-content').innerHTML = alertHtml('warning', data.error);
+    return;
+  }
+
+  let html = `<div class="metrics-row">
+    ${metricCard('Problem Type', data.problem_type, 'blue')}
+    ${metricCard('Model', data.model_name.split(' ').slice(0,2).join(' '), 'purple')}
+  </div>`;
+
+  if (data.problem_type === 'Regression') {
+    html += `<div class="section-title">Regression Metrics</div>
+      <div class="metrics-row">
+        ${metricCard('MAE', data.mae, 'blue')}
+        ${metricCard('MSE', data.mse, 'purple')}
+        ${metricCard('RMSE', data.rmse, 'amber')}
+        ${metricCard('R² Score', data.r2, 'green')}
+      </div>
+      <div class="divider"></div>
+      <div class="section-title">Actual vs Predicted</div>
+      <div class="card"><img class="chart-img" src="data:image/png;base64,${data.scatter_img}"></div>
+      <div class="section-title">Residual Plot</div>
+      <div class="card"><img class="chart-img" src="data:image/png;base64,${data.residual_img}"></div>`;
+
+  } else if (data.problem_type === 'Classification') {
+    html += `<div class="section-title">Classification Metrics</div>
+      <div class="metrics-row">
+        ${metricCard('Accuracy', data.accuracy, 'blue')}
+        ${metricCard('Precision', data.precision, 'purple')}
+        ${metricCard('Recall', data.recall, 'amber')}
+        ${metricCard('F1 Score', data.f1, 'green')}
+      </div>
+      <div class="divider"></div>
+      <div class="section-title">Confusion Matrix</div>
+      <div class="card"><img class="chart-img" src="data:image/png;base64,${data.cm_img}"></div>
+      <div class="section-title">Prediction Summary</div>
+      <div class="card"><div class="table-wrapper">${buildTable(data.preview_cols, data.preview)}</div></div>`;
+
+  } else if (data.problem_type === 'Clustering') {
+    html += `<div class="section-title">Clustering Metrics</div>
+      <div class="metrics-row">
+        ${metricCard('Silhouette Score', data.sil_score !== null ? data.sil_score : 'N/A', 'blue')}
+      </div>
+      ${data.sil_score === null ? alertHtml('warning', 'Silhouette Score cannot be computed for this clustering result.') : ''}
+      <div class="divider"></div>
+      <div class="section-title">Cluster Distribution</div>
+      <div class="card">
+        <div class="table-wrapper">${buildTable(['Cluster','Count'], data.cluster_data.map(r => [r.Cluster, r.Count]))}</div>
+      </div>
+      <div class="card"><img class="chart-img" src="data:image/png;base64,${data.bar_img}"></div>
+      ${data.has_noise ? alertHtml('info', 'Cluster -1 in DBSCAN means noise / outlier points.') : ''}`;
+  }
+
+  document.getElementById('metrics-content').innerHTML = html;
+}
+
+// ============================================================
+// SUMMARY
+// ============================================================
+async function loadSummary() {
+  document.getElementById('summary-content').innerHTML = '<div class="loading"><div class="spinner"></div>Compiling summary...</div>';
+  const data = await api('/api/summary');
+
+  const interpClass = data.interpretation ? data.interpretation[0] : 'info';
+  const interpMsg = data.interpretation ? data.interpretation[1] : 'No model trained yet.';
+
+  let metricsHtml = '';
+  if (data.metrics && typeof data.metrics === 'object') {
+    const entries = Object.entries(data.metrics).filter(([k]) => k !== 'cluster_dist');
+    metricsHtml = `<div class="metrics-row">${entries.map(([k,v]) => metricCard(k, v, 'blue')).join('')}</div>`;
+    if (data.metrics.cluster_dist) {
+      metricsHtml += `<div class="card"><div class="table-wrapper">${buildTable(['Cluster','Count'], data.metrics.cluster_dist.map(r => [r.Cluster, r.Count]))}</div></div>`;
+    }
+  }
+
+  let procTableHtml = '';
+  if (data.summary_table.length) {
+    procTableHtml = buildTable(['Column Name', 'Data Type', 'Missing', 'Unique'], data.summary_table.map(r => [r.Column, r.DType, r.Missing, r.Unique]));
+  }
+
+  document.getElementById('summary-content').innerHTML = `
+    <div class="section-title">Project Overview</div>
+    <div class="metrics-row">
+      ${metricCard('Problem Type', data.problem_type, 'blue')}
+      ${metricCard('Target Column', data.target_col || 'Not Required', 'purple')}
+      ${metricCard('Model Used', data.model_name.split(' ').slice(0,2).join(' '), 'green')}
+    </div>
+    <div class="metrics-row">
+      ${metricCard('Raw Dataset', `${data.raw_shape[0]}×${data.raw_shape[1]}`, 'amber')}
+      ${metricCard('Processed Dataset', `${data.proc_shape[0]}×${data.proc_shape[1]}`, 'cyan')}
+    </div>
+
+    <div class="divider"></div>
+    <div class="section-title">Dataset Details</div>
+    <div class="card">
+      <div class="card-header"><div class="card-icon" style="background:rgba(59,130,246,0.1)">📋</div>
+        <div><div class="card-title">Column Summary</div></div></div>
+      <div class="table-wrapper">${procTableHtml || '<div class="alert alert-warning"><span>⚠️</span><span>No processed dataset found.</span></div>'}</div>
+    </div>
+    ${data.proc_preview.length ? `<div class="card">
+      <div class="card-header"><div class="card-icon" style="background:rgba(139,92,246,0.1)">👁️</div>
+        <div><div class="card-title">Processed Dataset Preview</div><div class="card-subtitle">First 10 rows</div></div></div>
+      <div class="table-wrapper">${buildTable(data.proc_cols, data.proc_preview)}</div>
+    </div>` : ''}
+
+    <div class="divider"></div>
+    <div class="section-title">Feature Summary</div>
+    <div class="card">
+      <p style="font-size:13px;color:var(--text-secondary);margin-bottom:0.75rem">
+        <strong style="color:var(--text-primary)">Usable features: ${data.usable_features.length}</strong>
+      </p>
+      <div class="tag-list">${data.usable_features.map(f => `<span class="tag tag-blue">${f}</span>`).join('')}</div>
+      ${data.dropped.length ? `<div style="margin-top:0.75rem"><p style="font-size:12px;color:var(--text-muted);margin-bottom:6px">Dropped (${data.dropped.length}):</p><div class="tag-list">${data.dropped.map(f => `<span class="tag" style="background:rgba(239,68,68,0.08);color:#f87171;border-color:rgba(239,68,68,0.15)">${f}</span>`).join('')}</div></div>` : ''}
+    </div>
+
+    <div class="divider"></div>
+    <div class="section-title">Model Performance Summary</div>
+    ${metricsHtml}
+    <div class="alert alert-${interpClass === 'excellent' ? 'success' : interpClass === 'good' ? 'info' : interpClass === 'moderate' ? 'warning' : 'error'}">
+      <span>${interpClass === 'excellent' ? '✅' : interpClass === 'good' ? 'ℹ️' : '⚠️'}</span>
+      <span>${interpMsg}</span>
+    </div>
+
+    <div class="divider"></div>
+    <div class="section-title">Final Conclusion</div>
+    <div class="card">
+      <p style="font-size:14px;color:var(--text-secondary);line-height:1.7">${data.conclusion}</p>
+    </div>
+
+    <div class="divider"></div>
+    <div class="section-title">Ready-to-Use Summary</div>
+    <div class="card">
+      <div class="card-header"><div class="card-icon" style="background:rgba(16,185,129,0.1)">📄</div>
+        <div><div class="card-title">Copy Summary</div></div></div>
+      <textarea class="form-control" id="summary-textarea" readonly>${data.summary_text}</textarea>
+      <button class="btn btn-secondary btn-sm" style="margin-top:0.75rem" onclick="copySummary()">📋 Copy to Clipboard</button>
+    </div>`;
+}
+
+function copySummary() {
+  const ta = document.getElementById('summary-textarea');
+  ta.select();
+  navigator.clipboard.writeText(ta.value).then(() => showToast('Copied to clipboard!', 'success'));
+}
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+  showPage('home');
+});
+</script>
+</body>
+</html>
